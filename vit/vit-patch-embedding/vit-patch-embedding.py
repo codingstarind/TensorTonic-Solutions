@@ -8,16 +8,11 @@ def patch_embed(image: np.ndarray, patch_size: int, embed_dim: int, W_proj: np.n
     # YOUR CODE HERE
     b, h, w, c = image.shape
     p = patch_size
-    n = (h//p) * (w//p)
-    d = embed_dim
-    ppc = p*p*c
-    patches = image.reshape(b, h // patch_size, patch_size, w // patch_size, patch_size,c)
-    patches = patches.transpose(0, 1, 3, 2, 4, 5).reshape(b, n, ppc)
-
-    if W_proj is None:
-        W_proj = np.random.randn(ppc,d)*0.02
-    else:
-        W_proj = np.array(W_proj)
-    lin_proj_image = patches @ W_proj
+    n = h//p * w//p
+    patches = image.reshape(b, h//p,p,w//p,p,c)
+    patches = patches.transpose(0,1,3,2,4,5).reshape(b,n,p*p*c)
     
-    return lin_proj_image
+    patch_dim = p**2 *c
+    if W_proj is None:
+        W_proj = np.random.randn(patch_dim, embed_dim)*0.02
+    return patches@W_proj
